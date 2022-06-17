@@ -56,8 +56,19 @@ const std::vector<const char*> validation_layers = {
     "VK_LAYER_KHRONOS_validation"
 };
 
+const std::vector<const char*> device_extensions = {
+    "VK_KHR_swapchain",
+#ifdef __APPLE__
+    // **for Apple M1 only**
+    // Enable it as, if the VK_KHR_portability_subset
+    // extension is included in pProperties of vkEnumerateDeviceExtensionProperties,
+    // ppEnabledExtensionNames must include "VK_KHR_portability_subset"
+    "VK_KHR_portability_subset"
+#endif
+};
+
 bool checkValidationLayerSupport() {
-    uint32_t layer_count;
+    uint32_t layer_count {};
     vkEnumerateInstanceLayerProperties(&layer_count, nullptr);
     
     std::vector<VkLayerProperties> available_layers(layer_count);
@@ -73,11 +84,41 @@ bool checkValidationLayerSupport() {
             }
         }
         if (!found) {
-            std::cerr << "ERROR: did not found the right validation layer" << std::endl;
+            std::cerr << "ERROR: did not found the required validation layer(s)" << std::endl;
             return false;
         }
     }
 
+    return true;
+}
+
+bool checkDeviceExtensionSupport(VkPhysicalDevice physical_device) {
+    uint32_t extensions_count {};
+    vkEnumerateDeviceExtensionProperties(physical_device, nullptr, &extensions_count, nullptr);
+    
+    std::vector<VkExtensionProperties> available_extensions(extensions_count);
+    vkEnumerateDeviceExtensionProperties(physical_device, nullptr, &extensions_count, available_extensions.data());
+    
+    //Check for device extensions
+    for (const char* extension_name: device_extensions) {
+        bool found = false;
+        for (const auto& extension_properties: available_extensions) {
+#ifdef DEBUG
+            std::cout << "Checking device extension " << extension_properties.extensionName << "... ";
+#endif
+            if (strcmp(extension_name, extension_properties.extensionName) == 0) {
+                std::cout << "required!" << std::endl;
+                found = true;
+                break;
+            } else
+                std::cout << "**not** required!" << std::endl;
+        }
+        if (!found) {
+            std::cerr << "ERROR: did not found the required device extension(s)" << std::endl;
+            return false;
+        }
+    }
+    
     return true;
 }
 
@@ -130,6 +171,39 @@ QueueFamilyIndices findQueueFamilies(const VkPhysicalDevice& device, const VkSur
     return queue_family_indices;
 }
 
+struct SwapChainSupportDetails {
+    VkSurfaceCapabilitiesKHR capabilities;
+    std::vector<VkSurfaceFormatKHR> formats;
+    std::vector<VkPresentModeKHR> present_modes;
+};
+
+/**
+ * Make sure that the SwapChain is adequate for our needs.
+ */
+SwapChainSupportDetails querySwapChainSupport(VkPhysicalDevice physical_device, VkSurfaceKHR surface) {
+    SwapChainSupportDetails support_details;
+    
+    // Query the capabilites of the graphics device
+    vkGetPhysicalDeviceSurfaceCapabilitiesKHR(physical_device, surface, &support_details.capabilities);
+    
+    uint32_t format_count {};
+    vkGetPhysicalDeviceSurfaceFormatsKHR(physical_device, surface, &format_count, nullptr);
+    if (format_count != 0) {
+        // Make sure to hold all the available formats
+        support_details.formats.resize(format_count);
+        vkGetPhysicalDeviceSurfaceFormatsKHR(physical_device, surface, &format_count, support_details.formats.data());
+    }
+    
+    uint32_t present_modes_count {};
+    vkGetPhysicalDeviceSurfacePresentModesKHR(physical_device, surface, &present_modes_count, nullptr);
+    if (present_modes_count != 0) {
+        // Make sure to hold all the available present modes
+        support_details.present_modes.resize(present_modes_count);
+        vkGetPhysicalDeviceSurfacePresentModesKHR(physical_device, surface, &present_modes_count, support_details.present_modes.data());
+    }
+    return support_details;
+}
+
 class TriangleApplication {
     
 public:
@@ -152,6 +226,9 @@ public:
         m_vk_instance = NULL;
         m_graphics_device = VK_NULL_HANDLE;
         m_logical_graphics_device = NULL;
+        m_graphics_queue = NULL;
+        m_present_queue = NULL;
+        m_surface = NULL;
     }
     
 private:
@@ -305,8 +382,34 @@ private:
         }
 #endif
         m_graphics_device = devices[0];
-        if (m_graphics_device == VK_NULL_HANDLE)
+#ifdef DEBUG
+        std::cout << "-> Checking the graphics device... ";
+#endif
+        if (m_graphics_device == VK_NULL_HANDLE) {
             throw std::runtime_error("failed to find a graphice device (GPU) with Vulkan support");
+            return;
+        }
+#ifdef DEBUG
+        std::cout << "ok!" << std::endl;
+        std::cout << "-> Checking the device extension support... ";
+#endif
+        if (!checkDeviceExtensionSupport(m_graphics_device)) {
+            throw std::runtime_error("device extensions have not been found");
+            return;
+        }
+#ifdef DEBUG
+        std::cout << "ok!" << std::endl;
+        std::cout << "-> Checking the swapchain support... ";
+#endif
+        // Make sure the SwapChain is adequate for our needs
+        SwapChainSupportDetails swapchain_support = querySwapChainSupport(m_graphics_device, m_surface);
+        if (swapchain_support.formats.empty() || swapchain_support.present_modes.empty()) {
+            throw std::runtime_error("swapchain support is incorrect on your device");
+            return;
+        }
+#ifdef DEBUG
+        std::cout << "ok!" << std::endl;
+#endif
     }
     
     /**
@@ -356,17 +459,10 @@ private:
         } else {
             device_create_info.enabledLayerCount = 0;
         }
-#ifdef __APPLE__
-        // **for Apple M1 only**
-        // Enable it as, if the VK_KHR_portability_subset
-        // extension is included in pProperties of vkEnumerateDeviceExtensionProperties,
-        // ppEnabledExtensionNames must include "VK_KHR_portability_subset"
-        const char* deviceExtension = "VK_KHR_portability_subset";
-        device_create_info.enabledExtensionCount = 1;
-        device_create_info.ppEnabledExtensionNames = &deviceExtension;
-#else
-        device_create_info.enabledExtensionCount = 0;
-#endif // __APPLE
+        // Enable device extensions, required to use Vulkan
+        // on your device
+        device_create_info.enabledExtensionCount = static_cast<uint32_t>(device_extensions.size());
+        device_create_info.ppEnabledExtensionNames = device_extensions.data();
 #endif // _ENABLE_COMPATIBILITY_WITH_OLDER_VK_IMPL
         if (vkCreateDevice(m_graphics_device, &device_create_info, nullptr, &m_logical_graphics_device) != VK_SUCCESS) {
             throw std::runtime_error("failed to create logical device");
