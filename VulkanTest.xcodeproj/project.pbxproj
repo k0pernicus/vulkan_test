@@ -18,6 +18,9 @@
 		69650FE42856290F00D63B86 /* libMoltenVK.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 69650FE22856290800D63B86 /* libMoltenVK.dylib */; };
 		69650FEC285643F200D63B86 /* libvulkan.1.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 690827852855BF8700810954 /* libvulkan.1.dylib */; };
 		69650FEE285643F700D63B86 /* libvulkan.1.dylib in CopyFiles */ = {isa = PBXBuildFile; fileRef = 69650FED285643F700D63B86 /* libvulkan.1.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		69903B05285D222F008D4003 /* swapchain_utils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 69903B03285D222F008D4003 /* swapchain_utils.cpp */; };
+		69903B08285D235C008D4003 /* queue_utils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 69903B06285D235C008D4003 /* queue_utils.cpp */; };
+		69903B0B285D2442008D4003 /* extension_support.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 69903B09285D2442008D4003 /* extension_support.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -50,6 +53,12 @@
 		69650FE22856290800D63B86 /* libMoltenVK.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libMoltenVK.dylib; path = ../../opt/VulkanSDK/1.3.211.0/macOS/lib/libMoltenVK.dylib; sourceTree = "<group>"; };
 		69650FE628562BA000D63B86 /* libvulkan.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libvulkan.dylib; path = ../../opt/VulkanSDK/1.3.211.0/macOS/lib/libvulkan.dylib; sourceTree = "<group>"; };
 		69650FED285643F700D63B86 /* libvulkan.1.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libvulkan.1.dylib; path = ../../opt/VulkanSDK/1.3.211.0/macOS/lib/libvulkan.1.dylib; sourceTree = "<group>"; };
+		69903B03285D222F008D4003 /* swapchain_utils.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = swapchain_utils.cpp; sourceTree = "<group>"; };
+		69903B04285D222F008D4003 /* swapchain_utils.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = swapchain_utils.hpp; sourceTree = "<group>"; };
+		69903B06285D235C008D4003 /* queue_utils.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = queue_utils.cpp; sourceTree = "<group>"; };
+		69903B07285D235C008D4003 /* queue_utils.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = queue_utils.hpp; sourceTree = "<group>"; };
+		69903B09285D2442008D4003 /* extension_support.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = extension_support.cpp; sourceTree = "<group>"; };
+		69903B0A285D2442008D4003 /* extension_support.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = extension_support.hpp; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -94,6 +103,12 @@
 			isa = PBXGroup;
 			children = (
 				690827792855BCED00810954 /* main.cpp */,
+				69903B03285D222F008D4003 /* swapchain_utils.cpp */,
+				69903B04285D222F008D4003 /* swapchain_utils.hpp */,
+				69903B06285D235C008D4003 /* queue_utils.cpp */,
+				69903B07285D235C008D4003 /* queue_utils.hpp */,
+				69903B09285D2442008D4003 /* extension_support.cpp */,
+				69903B0A285D2442008D4003 /* extension_support.hpp */,
 			);
 			path = VulkanTest;
 			sourceTree = "<group>";
@@ -167,7 +182,10 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				69903B05285D222F008D4003 /* swapchain_utils.cpp in Sources */,
+				69903B08285D235C008D4003 /* queue_utils.cpp in Sources */,
 				6908277A2855BCED00810954 /* main.cpp in Sources */,
+				69903B0B285D2442008D4003 /* extension_support.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

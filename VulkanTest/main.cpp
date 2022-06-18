@@ -15,6 +15,10 @@
 #include <optional>
 #include <set>
 
+#include "extension_support.hpp"
+#include "queue_utils.hpp"
+#include "swapchain_utils.hpp"
+
 #ifdef __APPLE__
 #pragma message "Apple platform support"
 #else
@@ -51,158 +55,6 @@ constexpr uint32_t const ENGINE_VERSION VK_MAKE_VERSION(
     ENGINE_MINOR_VERSION,
     ENGINE_PATCH_VERSION
 );
-
-const std::vector<const char*> validation_layers = {
-    "VK_LAYER_KHRONOS_validation"
-};
-
-const std::vector<const char*> device_extensions = {
-    "VK_KHR_swapchain",
-#ifdef __APPLE__
-    // **for Apple M1 only**
-    // Enable it as, if the VK_KHR_portability_subset
-    // extension is included in pProperties of vkEnumerateDeviceExtensionProperties,
-    // ppEnabledExtensionNames must include "VK_KHR_portability_subset"
-    "VK_KHR_portability_subset"
-#endif
-};
-
-bool checkValidationLayerSupport() {
-    uint32_t layer_count {};
-    vkEnumerateInstanceLayerProperties(&layer_count, nullptr);
-    
-    std::vector<VkLayerProperties> available_layers(layer_count);
-    vkEnumerateInstanceLayerProperties(&layer_count, available_layers.data());
-    
-    // Check for validation layers
-    for (const char* layer_name : validation_layers) {
-        bool found = false;
-        for (const auto& layer_properties : available_layers) {
-            if (strcmp(layer_name, layer_properties.layerName) == 0) {
-                found = true;
-                break;
-            }
-        }
-        if (!found) {
-            std::cerr << "ERROR: did not found the required validation layer(s)" << std::endl;
-            return false;
-        }
-    }
-
-    return true;
-}
-
-bool checkDeviceExtensionSupport(VkPhysicalDevice physical_device) {
-    uint32_t extensions_count {};
-    vkEnumerateDeviceExtensionProperties(physical_device, nullptr, &extensions_count, nullptr);
-    
-    std::vector<VkExtensionProperties> available_extensions(extensions_count);
-    vkEnumerateDeviceExtensionProperties(physical_device, nullptr, &extensions_count, available_extensions.data());
-    
-    //Check for device extensions
-    for (const char* extension_name: device_extensions) {
-        bool found = false;
-        for (const auto& extension_properties: available_extensions) {
-#ifdef DEBUG
-            std::cout << "Checking device extension " << extension_properties.extensionName << "... ";
-#endif
-            if (strcmp(extension_name, extension_properties.extensionName) == 0) {
-                std::cout << "required!" << std::endl;
-                found = true;
-                break;
-            } else
-                std::cout << "**not** required!" << std::endl;
-        }
-        if (!found) {
-            std::cerr << "ERROR: did not found the required device extension(s)" << std::endl;
-            return false;
-        }
-    }
-    
-    return true;
-}
-
-/**
- * Stores, as optional, queue family indices
- */
-struct QueueFamilyIndices {
-    std::optional<uint32_t> graphics_family;
-    // For rendered images
-    std::optional<uint32_t> present_family;
-    
-    // TODO: find a better method name...
-    bool hasSupport() {
-        return graphics_family.has_value() && present_family.has_value();
-    }
-};
-
-QueueFamilyIndices findQueueFamilies(const VkPhysicalDevice& device, const VkSurfaceKHR& present_surface) {
-    // Get all family queues
-    QueueFamilyIndices queue_family_indices {};
-    uint32_t family_count {};
-    vkGetPhysicalDeviceQueueFamilyProperties(device, &family_count, nullptr);
-    std::vector<VkQueueFamilyProperties> queue_families(family_count);
-    vkGetPhysicalDeviceQueueFamilyProperties(device, &family_count, queue_families.data());
-    // Find the (first) queue that supports VK_QUEUE_GRAPHICS_BIT & KHR
-    // The queue for VK_QUEUE_GRPAHICS_BIT & KHR is not necessarily the same!
-    // As an example, the queue 1 can be linked to drawing, and the queue 3 for presentation.
-    // TODO: find the physical device that supports BOTH drawing and presentation, to improve perf!
-    int i = 0;
-    for (const auto& queue_family: queue_families) {
-        if (queue_family_indices.hasSupport())
-            break;
-        if (!queue_family_indices.graphics_family.has_value() && (queue_family.queueFlags & VK_QUEUE_GRAPHICS_BIT))
-            queue_family_indices.graphics_family = i;
-        if (!queue_family_indices.present_family.has_value()) {
-            VkBool32 present_support = false;
-            if (vkGetPhysicalDeviceSurfaceSupportKHR(device, i, present_surface, &present_support); present_support)
-                queue_family_indices.present_family = i;
-        }
-        i++;
-    }
-#ifdef DEBUG
-    if (queue_family_indices.graphics_family.has_value()) {
-        std::cout << "-> Found drawing family queue, at index " << queue_family_indices.graphics_family.value() << std::endl;
-    }
-    if (queue_family_indices.present_family.has_value()) {
-        std::cout << "-> Found present family queue, at index " << queue_family_indices.present_family.value() << std::endl;
-    }
-#endif
-    return queue_family_indices;
-}
-
-struct SwapChainSupportDetails {
-    VkSurfaceCapabilitiesKHR capabilities;
-    std::vector<VkSurfaceFormatKHR> formats;
-    std::vector<VkPresentModeKHR> present_modes;
-};
-
-/**
- * Make sure that the SwapChain is adequate for our needs.
- */
-SwapChainSupportDetails querySwapChainSupport(VkPhysicalDevice physical_device, VkSurfaceKHR surface) {
-    SwapChainSupportDetails support_details;
-    
-    // Query the capabilites of the graphics device
-    vkGetPhysicalDeviceSurfaceCapabilitiesKHR(physical_device, surface, &support_details.capabilities);
-    
-    uint32_t format_count {};
-    vkGetPhysicalDeviceSurfaceFormatsKHR(physical_device, surface, &format_count, nullptr);
-    if (format_count != 0) {
-        // Make sure to hold all the available formats
-        support_details.formats.resize(format_count);
-        vkGetPhysicalDeviceSurfaceFormatsKHR(physical_device, surface, &format_count, support_details.formats.data());
-    }
-    
-    uint32_t present_modes_count {};
-    vkGetPhysicalDeviceSurfacePresentModesKHR(physical_device, surface, &present_modes_count, nullptr);
-    if (present_modes_count != 0) {
-        // Make sure to hold all the available present modes
-        support_details.present_modes.resize(present_modes_count);
-        vkGetPhysicalDeviceSurfacePresentModesKHR(physical_device, surface, &present_modes_count, support_details.present_modes.data());
-    }
-    return support_details;
-}
 
 class TriangleApplication {
     
@@ -247,6 +99,15 @@ private:
     VkQueue m_graphics_queue, m_present_queue = NULL;
     // Abstract type of surface to send rendered images
     VkSurfaceKHR m_surface = NULL;
+    // The swap chain
+    VkSwapchainKHR m_swap_chain = NULL;
+    // Set of images to be drawn and present
+    // to the window
+    std::vector<VkImage> m_swap_chain_images;
+    // The retrieved and stored image format for our swap chain
+    VkSurfaceFormatKHR m_swap_chain_surface_format;
+    // The retrieved and stored extent of our swap chain
+    VkExtent2D m_swap_chain_extent;
     
     VkApplicationInfo _createAppInfo() {
         // Create a Vulkan app info
@@ -268,6 +129,11 @@ private:
     }
     
     void _initVulkan() {
+#ifdef DEBUG
+        std::cout << "############################" << std::endl;
+        std::cout << "Initializing Vulkan instance ..." << std::endl;
+        std::cout << "############################" << std::endl;
+#endif
         if (enable_validation_layers && !checkValidationLayerSupport()) {
             throw std::runtime_error("validation layers requested, but not available!");
             return;
@@ -326,6 +192,11 @@ private:
     }
     
     void _createSurface() {
+#ifdef DEBUG
+        std::cout << "##########################" << std::endl;
+        std::cout << "Creating window surface..." << std::endl;
+        std::cout << "##########################" << std::endl;
+#endif
         if (const auto res = glfwCreateWindowSurface(m_vk_instance, m_app_window, nullptr, &m_surface); res != VK_SUCCESS) {
             switch (res) {
                 case VK_ERROR_INITIALIZATION_FAILED:
@@ -347,6 +218,11 @@ private:
     }
     
     void _pickGraphicsDevice() {
+#ifdef DEBUG
+        std::cout << "#############################" << std::endl;
+        std::cout << "Choosing a physical device..." << std::endl;
+        std::cout << "#############################" << std::endl;
+#endif
         uint32_t device_count {};
         vkEnumeratePhysicalDevices(m_vk_instance, &device_count, nullptr);
         if (device_count == 0) {
@@ -417,6 +293,11 @@ private:
      * the Queue Create Info information.
      */
     void _initLogicalGraphicsDevice() {
+#ifdef DEBUG
+        std::cout << "##########################" << std::endl;
+        std::cout << "Init the logical device..." << std::endl;
+        std::cout << "##########################" << std::endl;
+#endif
         if (m_graphics_device == NULL) return;
         QueueFamilyIndices queue_family_indices = findQueueFamilies(m_graphics_device, m_surface);
         
@@ -473,6 +354,94 @@ private:
         vkGetDeviceQueue(m_logical_graphics_device, queue_family_indices.present_family.value(), 0, &m_present_queue);
     }
     
+    void _createSwapChain() {
+#ifdef DEBUG
+        std::cout << "##########################" << std::endl;
+        std::cout << "Creating the swap chain..." << std::endl;
+        std::cout << "##########################" << std::endl;
+#endif
+        SwapChainSupportDetails swap_chain_support = querySwapChainSupport(m_graphics_device, m_surface);
+        
+        std::optional<VkSurfaceFormatKHR> surface_format = chooseSwapSurfaceFormat(swap_chain_support.formats);
+        VkPresentModeKHR present_mode = chooseSwapPresentMode(swap_chain_support.present_modes);
+        std::optional<VkExtent2D> extent = chooseSwapExtent(swap_chain_support.capabilities, m_app_window);
+        
+        if (!surface_format.has_value() || !extent.has_value()) {
+            throw std::runtime_error("An error happened setting the swap chain support structure");
+            return;
+        }
+        
+        m_swap_chain_surface_format = surface_format.value();
+        m_swap_chain_extent = extent.value();
+        
+        uint32_t image_count = swap_chain_support.capabilities.minImageCount + 1;
+        // Make sure to not exceed the max number of images here
+        if (swap_chain_support.capabilities.maxImageCount > 0 && image_count > swap_chain_support.capabilities.maxImageCount)
+            image_count = swap_chain_support.capabilities.maxImageCount;
+
+#ifdef DEBUG
+            std::cout << "-> Image count: " << image_count << std::endl;
+#endif
+        
+        VkSwapchainCreateInfoKHR swap_chain_create_info {};
+        swap_chain_create_info.sType = VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR;
+        swap_chain_create_info.surface = m_surface; // Specify which surface the swap chain should be tied to
+        swap_chain_create_info.minImageCount = image_count;
+        swap_chain_create_info.imageFormat = m_swap_chain_surface_format.format;
+        swap_chain_create_info.imageColorSpace = m_swap_chain_surface_format.colorSpace;
+        swap_chain_create_info.imageExtent = m_swap_chain_extent;
+        swap_chain_create_info.imageArrayLayers = 1; // Always one here, as we do not develop something with 3D
+        swap_chain_create_info.imageUsage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT; // Color attachment only
+        
+        // As graphics queue != present queue, we need to specify how to handle swap chain images
+        // that will be used across multiple queue families
+        QueueFamilyIndices indices = findQueueFamilies(m_graphics_device, m_surface);
+        uint32_t family_indices[] = {indices.graphics_family.value(), indices.present_family.value()};
+        if (indices.graphics_family != indices.present_family) {
+#ifdef DEBUG
+            std::cout << "-> Graphics and Present family queues are different" << std::endl;
+#endif
+            // No explicit ownership transfers with images that can be used
+            // across multiple queue families
+            swap_chain_create_info.imageSharingMode = VK_SHARING_MODE_CONCURRENT;
+            swap_chain_create_info.queueFamilyIndexCount = 2;
+            swap_chain_create_info.pQueueFamilyIndices = family_indices;
+        } else {
+#ifdef DEBUG
+            std::cout << "-> Graphics and Present family queues are the same" << std::endl;
+#endif
+            swap_chain_create_info.imageSharingMode = VK_SHARING_MODE_EXCLUSIVE;
+        }
+        // No transformation
+        swap_chain_create_info.preTransform = swap_chain_support.capabilities.currentTransform;
+        // Ignore the alpha channel
+        swap_chain_create_info.compositeAlpha = VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR;
+        swap_chain_create_info.presentMode = present_mode;
+        swap_chain_create_info.clipped = VK_TRUE; // Enable clipping
+        swap_chain_create_info.oldSwapchain = VK_NULL_HANDLE; // TODO: handle invalid / unoptimized swap chain at runtime
+
+#ifdef DEBUG
+        std::cout << "-> Initializing the swap chain... ";
+#endif
+        
+        // Now that we configured the swap chain from scratch,
+        // initialize it and store it
+        if (vkCreateSwapchainKHR(m_logical_graphics_device, &swap_chain_create_info, nullptr, &m_swap_chain) != VK_SUCCESS) {
+#ifdef DEBUG
+        std::cout << "failed" << std::endl;
+#endif
+            throw std::runtime_error("failed to create the swap chain for the application");
+        }
+#ifdef DEBUG
+        std::cout << "success" << std::endl;
+#endif
+        // Retrieving the images from the swap chain
+        uint32_t sw_images {};
+        vkGetSwapchainImagesKHR(m_logical_graphics_device, m_swap_chain, &sw_images, nullptr);
+        m_swap_chain_images.resize(sw_images);
+        vkGetSwapchainImagesKHR(m_logical_graphics_device, m_swap_chain, &sw_images, m_swap_chain_images.data());
+    }
+    
     void initWindow() {
         glfwInit(); // Initialize the GLFW library
         glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API); // No OpenGL context
@@ -487,6 +456,7 @@ private:
         _createSurface();
         _pickGraphicsDevice();
         _initLogicalGraphicsDevice();
+        _createSwapChain();
     }
     
     void loop() {
@@ -494,12 +464,36 @@ private:
     }
     
     void clean() {
+#ifdef DEBUG
+        std::cout << "######################################" << std::endl;
+        std::cout << "Ending and cleaning the application..." << std::endl;
+        std::cout << "######################################" << std::endl;
+#endif
         // Destroy the Vulkan instances
+#ifdef DEBUG
+        std::cout << "* Destroying the swap chain..." << std::endl;
+#endif
+        if (m_swap_chain != NULL) vkDestroySwapchainKHR(m_logical_graphics_device, m_swap_chain, nullptr);
+#ifdef DEBUG
+        std::cout << "* Destroying the logical device..." << std::endl;
+#endif
         if (m_logical_graphics_device != NULL) vkDestroyDevice(m_logical_graphics_device, nullptr);
+#ifdef DEBUG
+        std::cout << "* Destroying the Vulkan surface..." << std::endl;
+#endif
         if (m_surface != NULL) vkDestroySurfaceKHR(m_vk_instance, m_surface, nullptr);
+#ifdef DEBUG
+        std::cout << "* Destroying the Vulkan instance..." << std::endl;
+#endif
         if (m_vk_instance != NULL) vkDestroyInstance(m_vk_instance, nullptr);
         // Destroy the window
+#ifdef DEBUG
+        std::cout << "* Destroying the (GLFW) window..." << std::endl;
+#endif
         if (m_app_window != nullptr) glfwDestroyWindow(m_app_window);
+#ifdef DEBUG
+        std::cout << "Terminating..." << std::endl;
+#endif
         glfwTerminate();
     }
 };
