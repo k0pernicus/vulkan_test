@@ -6,6 +6,7 @@
 //
 
 #include "queue_utils.hpp"
+#include "base.hpp"
 
 QueueFamilyIndices findQueueFamilies(const VkPhysicalDevice& device, const VkSurfaceKHR& present_surface) {
     // Get all family queues
@@ -31,13 +32,11 @@ QueueFamilyIndices findQueueFamilies(const VkPhysicalDevice& device, const VkSur
         }
         i++;
     }
-#ifdef DEBUG
     if (queue_family_indices.graphics_family.has_value()) {
-        std::cout << "-> Found drawing family queue, at index " << queue_family_indices.graphics_family.value() << std::endl;
+        Log("-> Found drawing family queue, at index " << queue_family_indices.graphics_family.value());
     }
     if (queue_family_indices.present_family.has_value()) {
-        std::cout << "-> Found present family queue, at index " << queue_family_indices.present_family.value() << std::endl;
+        Log("-> Found present family queue, at index " << queue_family_indices.present_family.value());
     }
-#endif
     return queue_family_indices;
 }

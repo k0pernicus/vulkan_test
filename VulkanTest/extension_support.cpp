@@ -6,6 +6,7 @@
 //
 
 #include "extension_support.hpp"
+#include "base.hpp"
 
 bool checkValidationLayerSupport() {
     uint32_t layer_count {};
@@ -43,18 +44,16 @@ bool checkDeviceExtensionSupport(VkPhysicalDevice physical_device) {
     for (const char* extension_name: device_extensions) {
         bool found = false;
         for (const auto& extension_properties: available_extensions) {
-#ifdef DEBUG
-            std::cout << "Checking device extension " << extension_properties.extensionName << "... ";
-#endif
+            Log("Checking device extension " << extension_properties.extensionName << "... ");
             if (strcmp(extension_name, extension_properties.extensionName) == 0) {
-                std::cout << "required!" << std::endl;
+                Log("required!");
                 found = true;
                 break;
             } else
-                std::cout << "**not** required!" << std::endl;
+                Log("**not** required!");
         }
         if (!found) {
-            std::cerr << "ERROR: did not found the required device extension(s)" << std::endl;
+            LogE("ERROR: did not found the required device extension(s)");
             return false;
         }
     }

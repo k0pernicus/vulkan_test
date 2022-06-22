@@ -14,6 +14,8 @@
 		6908278C2855BFE900810954 /* libglfw.3.3.dylib in CopyFiles */ = {isa = PBXBuildFile; fileRef = 6908278B2855BFE900810954 /* libglfw.3.3.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		691D20D12856940600F1DF1E /* libVkLayer_khronos_validation.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 691D20D02856940600F1DF1E /* libVkLayer_khronos_validation.dylib */; };
 		691D20D32856940B00F1DF1E /* libVkLayer_khronos_validation.dylib in CopyFiles */ = {isa = PBXBuildFile; fileRef = 691D20D22856940B00F1DF1E /* libVkLayer_khronos_validation.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		691DAFF2285F438800B52A65 /* shader_support.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 691DAFF0285F438800B52A65 /* shader_support.cpp */; };
+		691DAFF9285F801700B52A65 /* shaders in CopyFiles */ = {isa = PBXBuildFile; fileRef = 691DAFF8285F801700B52A65 /* shaders */; };
 		69650FE32856290800D63B86 /* libMoltenVK.dylib in CopyFiles */ = {isa = PBXBuildFile; fileRef = 69650FE22856290800D63B86 /* libMoltenVK.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		69650FE42856290F00D63B86 /* libMoltenVK.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 69650FE22856290800D63B86 /* libMoltenVK.dylib */; };
 		69650FEC285643F200D63B86 /* libvulkan.1.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 690827852855BF8700810954 /* libvulkan.1.dylib */; };
@@ -38,6 +40,16 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		691DAFF7285F7FE800B52A65 /* CopyFiles */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 16;
+			files = (
+				691DAFF9285F801700B52A65 /* shaders in CopyFiles */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
@@ -50,6 +62,14 @@
 		6908278B2855BFE900810954 /* libglfw.3.3.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libglfw.3.3.dylib; path = ../../../../opt/homebrew/lib/libglfw.3.3.dylib; sourceTree = "<group>"; };
 		691D20D02856940600F1DF1E /* libVkLayer_khronos_validation.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libVkLayer_khronos_validation.dylib; path = ../../opt/VulkanSDK/1.3.211.0/macOS/lib/libVkLayer_khronos_validation.dylib; sourceTree = "<group>"; };
 		691D20D22856940B00F1DF1E /* libVkLayer_khronos_validation.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libVkLayer_khronos_validation.dylib; path = ../../opt/VulkanSDK/1.3.211.0/macOS/lib/libVkLayer_khronos_validation.dylib; sourceTree = "<group>"; };
+		691DAFEC285F400A00B52A65 /* shader.vert */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = shader.vert; sourceTree = "<group>"; };
+		691DAFED285F40F800B52A65 /* Shader.frag */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = Shader.frag; sourceTree = "<group>"; };
+		691DAFEE285F425700B52A65 /* build_shaders.sh */ = {isa = PBXFileReference; lastKnownFileType = text.script.sh; path = build_shaders.sh; sourceTree = "<group>"; };
+		691DAFEF285F428C00B52A65 /* build_shaders.bat */ = {isa = PBXFileReference; lastKnownFileType = text; path = build_shaders.bat; sourceTree = "<group>"; };
+		691DAFF0285F438800B52A65 /* shader_support.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = shader_support.cpp; sourceTree = "<group>"; };
+		691DAFF1285F438800B52A65 /* shader_support.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = shader_support.hpp; sourceTree = "<group>"; };
+		691DAFF8285F801700B52A65 /* shaders */ = {isa = PBXFileReference; lastKnownFileType = folder; path = shaders; sourceTree = "<group>"; };
+		691DAFFA286257B200B52A65 /* base.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = base.hpp; sourceTree = "<group>"; };
 		69650FE22856290800D63B86 /* libMoltenVK.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libMoltenVK.dylib; path = ../../opt/VulkanSDK/1.3.211.0/macOS/lib/libMoltenVK.dylib; sourceTree = "<group>"; };
 		69650FE628562BA000D63B86 /* libvulkan.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libvulkan.dylib; path = ../../opt/VulkanSDK/1.3.211.0/macOS/lib/libvulkan.dylib; sourceTree = "<group>"; };
 		69650FED285643F700D63B86 /* libvulkan.1.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libvulkan.1.dylib; path = ../../opt/VulkanSDK/1.3.211.0/macOS/lib/libvulkan.1.dylib; sourceTree = "<group>"; };
@@ -80,6 +100,10 @@
 		6908276D2855BCED00810954 = {
 			isa = PBXGroup;
 			children = (
+				691DAFF8285F801700B52A65 /* shaders */,
+				691DAFEF285F428C00B52A65 /* build_shaders.bat */,
+				691DAFEE285F425700B52A65 /* build_shaders.sh */,
+				691DAFEB285F3FC900B52A65 /* shaders */,
 				691D20D22856940B00F1DF1E /* libVkLayer_khronos_validation.dylib */,
 				69650FED285643F700D63B86 /* libvulkan.1.dylib */,
 				69650FE22856290800D63B86 /* libMoltenVK.dylib */,
@@ -109,6 +133,9 @@
 				69903B07285D235C008D4003 /* queue_utils.hpp */,
 				69903B09285D2442008D4003 /* extension_support.cpp */,
 				69903B0A285D2442008D4003 /* extension_support.hpp */,
+				691DAFF0285F438800B52A65 /* shader_support.cpp */,
+				691DAFF1285F438800B52A65 /* shader_support.hpp */,
+				691DAFFA286257B200B52A65 /* base.hpp */,
 			);
 			path = VulkanTest;
 			sourceTree = "<group>";
@@ -125,6 +152,15 @@
 			name = Frameworks;
 			sourceTree = "<group>";
 		};
+		691DAFEB285F3FC900B52A65 /* shaders */ = {
+			isa = PBXGroup;
+			children = (
+				691DAFEC285F400A00B52A65 /* shader.vert */,
+				691DAFED285F40F800B52A65 /* Shader.frag */,
+			);
+			path = shaders;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -135,6 +171,7 @@
 				690827722855BCED00810954 /* Sources */,
 				690827732855BCED00810954 /* Frameworks */,
 				690827742855BCED00810954 /* CopyFiles */,
+				691DAFF7285F7FE800B52A65 /* CopyFiles */,
 			);
 			buildRules = (
 			);
@@ -182,6 +219,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				691DAFF2285F438800B52A65 /* shader_support.cpp in Sources */,
 				69903B05285D222F008D4003 /* swapchain_utils.cpp in Sources */,
 				69903B08285D235C008D4003 /* queue_utils.cpp in Sources */,
 				6908277A2855BCED00810954 /* main.cpp in Sources */,
