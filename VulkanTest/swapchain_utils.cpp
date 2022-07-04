@@ -6,6 +6,9 @@
 //
 
 #include "swapchain_utils.hpp"
+#ifdef _WIN32
+#include <algorithm>
+#endif
 
 SwapChainSupportDetails querySwapChainSupport(VkPhysicalDevice physical_device, VkSurfaceKHR surface) {
     SwapChainSupportDetails support_details;

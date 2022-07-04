@@ -15,6 +15,9 @@
 #include <optional>
 #include <set>
 #include <filesystem>
+#ifdef _WIN32
+#include <assert.h>
+#endif
 
 #include "base.hpp"
 #include "extension_support.hpp"
@@ -525,9 +528,14 @@ private:
     void _createGraphicsPipeline() {
         Log("#############################");
         Log("Creating graphics pipeline...");
-        Log("#############################");
+        Log("#############################"); 
+#ifdef __APPLE__
         const std::string vertex_shader_filepath = std::string(SHADERS_DIR).append("/").append("vert.spv");
         const std::string fragment_shader_filepath = std::string(SHADERS_DIR).append("/").append("frag.spv");
+#elif defined _WIN32
+        const std::string vertex_shader_filepath = std::string(SHADERS_DIR).append("\\").append("vert.spv");
+        const std::string fragment_shader_filepath = std::string(SHADERS_DIR).append("\\").append("frag.spv");
+#endif
         const auto opt_vertex_shader_code = loadShaderFile(vertex_shader_filepath);
         const auto opt_fragment_shader_code = loadShaderFile(fragment_shader_filepath);
         if (!opt_vertex_shader_code.has_value() || !opt_fragment_shader_code.has_value()) {

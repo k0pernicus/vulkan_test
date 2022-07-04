@@ -10,8 +10,15 @@
 
 #include <vector>
 #include <optional>
+#ifdef _WIN32
+#include <string>
+#endif
 
+#ifdef __APPLE__
 constexpr char SHADERS_DIR[] = "./shaders";
+#elif defined _WIN32
+constexpr char SHADERS_DIR[] = "..\\..\\shaders";
+#endif
 
 std::optional<std::vector<char>> loadShaderFile(const std::string filename);
 

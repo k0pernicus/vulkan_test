@@ -1,3 +1,2 @@
-dir shaders
-glslc.exe shader.vert -o vert.spv
-glslc.exe shader.frag -o frag.spv
+glslc.exe .\shaders\shader.vert -o .\shaders\vert.spv
+glslc.exe .\shaders\shader.frag -o .\shaders\frag.spv

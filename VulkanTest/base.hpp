@@ -8,10 +8,12 @@
 #ifndef Base_h
 #define Base_h
 
+#include <iostream>
+
 #ifdef __APPLE__
 #pragma message "Apple platform support"
-#else
-error "Unsupported platform"
+#elif defined _WIN32
+#pragma message "Microsoft Windows platform support"
 #endif
 
 #ifdef DEBUG

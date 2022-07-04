@@ -5,14 +5,18 @@
 //  Created by Antonin on 19/06/2022.
 //
 
+#include "base.hpp"
 #include "shader_support.hpp"
 #include <fstream>
+#include <filesystem>
 
 std::optional<std::vector<char>> loadShaderFile(const std::string filename) {
     // Read at the end to get the size
     std::ifstream file(filename, std::ios::ate | std::ios::binary);
-    
+
     if (!file.is_open()) {
+        const std::filesystem::path current_path = std::filesystem::current_path();
+        LogE("file '" << filename << "' not found in " << current_path);
         throw std::runtime_error("failed to open shader file " + std::string(filename));
         return std::nullopt;
     }
