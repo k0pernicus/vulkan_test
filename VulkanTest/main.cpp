@@ -533,7 +533,7 @@ private:
         const std::string vertex_shader_filepath = std::string(SHADERS_DIR).append("/").append("vert.spv");
         const std::string fragment_shader_filepath = std::string(SHADERS_DIR).append("/").append("frag.spv");
 #elif defined _WIN32
-        const std::string vertex_shader_filepath = std::string(SHADERS_DIR).append("\\").append("vert.spv");
+            const std::string vertex_shader_filepath = std::string(SHADERS_DIR).append("\\").append("vert.spv");
         const std::string fragment_shader_filepath = std::string(SHADERS_DIR).append("\\").append("frag.spv");
 #endif
         const auto opt_vertex_shader_code = loadShaderFile(vertex_shader_filepath);
