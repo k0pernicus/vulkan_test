@@ -1,0 +1,8 @@
+﻿  main.cpp
+C:\Users\anton\Devel\vulkan_test\VulkanTest\base.hpp(16,17): warning C4081: expected '('; found 'string'
+C:\Users\anton\Devel\vulkan_test\VulkanTest\main.cpp(610,46): warning C4244: '=': conversion from 'uint32_t' to 'float', possible loss of data
+C:\Users\anton\Devel\vulkan_test\VulkanTest\main.cpp(611,45): warning C4244: '=': conversion from 'uint32_t' to 'float', possible loss of data
+  shader_support.cpp
+C:\Users\anton\Devel\vulkan_test\VulkanTest\base.hpp(16,17): warning C4081: expected '('; found 'string'
+  Generating Code...
+  vulkan_test.vcxproj -> C:\Users\anton\Devel\vulkan_test\vulkan_test\x64\Debug\VulkanTest.vs.exe
