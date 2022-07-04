@@ -1,4 +1,4 @@
-A simple project to play with Vulkan, on both macOS and Windows, with C++17.
+A simple project to play with Vulkan, on both macOS and Windows, with C++17, which renders the famous RGB triangle.
 
 The program runs well on both Windows 10/11 (using Visual Studio 2022), and on M1 macs (using latest Xcode build).
 
